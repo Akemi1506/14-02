@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>San Valentín</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #EF09C7;
+        }
+        .container {
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            position: relative;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+            min-height: 40px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        #siButton {
+            background-color: #4CAF50;
+            color: white;
+            transform-origin: center;
+            transition: transform 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+        #noButton {
+            background-color: #f44336;
+            color: white;
+            position: fixed;
+            transform-origin: center;
+            transition: transform 0.3s ease;
+            z-index: 2;
+        }
+        #titulo {
+            color: white;
+            font-size: 24px;
+            margin: 20px 0 40px 0;
+            font-weight: bold;
+            position: relative;
+            z-index: 1;
+        }
+        #mensaje {
+            color: white;
+            font-size: 20px;
+            margin-top: 40px;
+            min-height: 30px;
+        }
+        .hidden {
+            display: none !important;
+        }
+        .image-container {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+        }
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="image-container">
+            <img id="dynamicImage" src="images/initial.jpeg" alt="Imagen dinámica">
+        </div>
+        <div id="titulo">¿Quieres ser mi San Valentín por un día?</div>
+        <div class="button-container">
+            <button id="siButton">Sí</button>
+            <button id="noButton">No</button>
+        </div>
+        <div id="mensaje"></div>
+    </div>
+
+    <script>
+        const siButton = document.getElementById('siButton');
+        const noButton = document.getElementById('noButton');
+        const titulo = document.getElementById('titulo');
+        const mensaje = document.getElementById('mensaje');
+        const dynamicImage = document.getElementById('dynamicImage');
+        let escalaYes = 1;
+        let contadorNo = 0;
+
+        const respuestas = [
+            {
+                mensaje: "¿Cómo así?",
+                imagen: "images/imagen1.jpg"
+            },
+            {
+                mensaje: "Anda Piénsalo Bien",
+                imagen: "images/imagen2.jpg"
+            },
+            {
+                mensaje: "Te amaré de mil maneras ujum",
+                imagen: "images/imagen3.jpg"
+            },
+            {
+                mensaje: "apocosi muy vrgs",
+                imagen: "images/imagen4.jpg"
+            },
+            {
+                mensaje: "Oye que se pasa",
+                imagen: "images/imagen5.jpeg"
+            },
+            {
+                mensaje: "Di que sí",
+                imagen: "images/imagen6.png"
+            },
+            {
+                mensaje: "ceciiii?",
+                imagen: "images/imagen7.jpg"
+            },
+            {
+                mensaje: "¿Por qué le sigues? 😢",
+                imagen: "images/imagen8.png"
+            },
+            {
+                mensaje: "Tas lastimando mi corazoncito de pollo 😭",
+                imagen: "images/imagen9.jpeg"
+            },
+            {
+                mensaje: "orunorunou",
+                imagen: "images/imagen10.jpeg"
+            },
+            {
+                mensaje: "Ta weno, Ojala se te aparezca una rata montada en una cucaracha voladora 😡",
+                imagen: "images/imagen11.jpg"
+            }
+        ];
+
+        function obtenerPosicionElemento(elemento) {
+            const rect = elemento.getBoundingClientRect();
+            return {
+                top: rect.top,
+                bottom: rect.bottom,
+                left: rect.left,
+                right: rect.right
+            };
+        }
+
+        function hayColision(pos1, pos2, margen = 50) {
+            return !(pos1.right + margen < pos2.left || 
+                    pos1.left > pos2.right + margen || 
+                    pos1.bottom + margen < pos2.top || 
+                    pos1.top > pos2.bottom + margen);
+        }
+
+        function moverBotonNo(inicial = false) {
+            if (inicial) {
+                noButton.style.position = 'static';
+                return;
+            }
+
+            noButton.style.position = 'fixed';
+            const maxX = window.innerWidth - noButton.offsetWidth;
+            const maxY = window.innerHeight - noButton.offsetHeight;
+            let intentos = 0;
+            let posicionValida = false;
+            
+            while (!posicionValida && intentos < 50) {
+                const randomX = Math.floor(Math.random() * maxX);
+                const randomY = Math.floor(Math.random() * maxY);
+                
+                noButton.style.left = randomX + 'px';
+                noButton.style.top = randomY + 'px';
+                
+                const posNoButton = obtenerPosicionElemento(noButton);
+                const posTitulo = obtenerPosicionElemento(titulo);
+                const posSiButton = obtenerPosicionElemento(siButton);
+                
+                if (!hayColision(posNoButton, posTitulo) && 
+                    !hayColision(posNoButton, posSiButton)) {
+                    posicionValida = true;
+                }
+                
+                intentos++;
+            }
+        }
+
+        function ajustarPosicionSiButton() {
+            const siButtonRect = siButton.getBoundingClientRect();
+            const tituloRect = titulo.getBoundingClientRect();
+            
+            if (siButtonRect.top <= tituloRect.bottom) {
+                siButton.style.marginTop = `${tituloRect.height + 20}px`;
+            }
+        }
+
+        siButton.addEventListener('click', () => {
+            titulo.textContent = "¡Sabía que dirías que sí! 🥰🥰";
+            noButton.classList.add('hidden');
+            siButton.classList.add('hidden');
+            dynamicImage.src = "images/final.png"; // Imagen final cuando dice que sí
+        });
+
+        noButton.addEventListener('mouseover', (e) => {
+            if (contadorNo < respuestas.length) {
+                titulo.textContent = respuestas[contadorNo].mensaje;
+                dynamicImage.src = respuestas[contadorNo].imagen;
+                contadorNo++;
+            }
+            
+            escalaYes = Math.min(escalaYes * 1.2, 3);
+            siButton.style.transform = `scale(${escalaYes})`;
+            
+            ajustarPosicionSiButton();
+            
+            setTimeout(moverBotonNo, 100);
+        });
+
+        window.addEventListener('load', () => moverBotonNo(true));
+        
+        window.addEventListener('resize', () => {
+            if (noButton.style.position === 'fixed') {
+                moverBotonNo();
+            }
+        });
+    </script>
+</body>
+</html>
